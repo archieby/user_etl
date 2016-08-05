@@ -1,11 +1,22 @@
 package by.arc.dao
 
+import by.arc._
 import by.arc.model.{Location, User}
-import scalikejdbc.{DB, _}
 import scalikejdbc.config.DBs
+import scalikejdbc.{DB, _}
 
 class ScalikeJdbcUserDao extends UserDao {
   DBs.setupAll()
+
+  override def initDb(): Boolean = DB localTx { implicit session =>
+    SQL(readFile(conf.getString("db.default.users.schema"))).execute.apply()
+    SQL(readFile(conf.getString("db.default.locations.schema"))).execute.apply()
+    true
+  }
+
+  override def count(): Int = DB readOnly { implicit session =>
+    sql"SELECT COUNT(*) as cnt FROM users".map(_.int("cnt")).single().apply().get
+  }
 
   override def getAll(): Seq[User] = DB readOnly { implicit session =>
     sql"${UserSql}".map(userMapping).list().apply()
@@ -13,7 +24,7 @@ class ScalikeJdbcUserDao extends UserDao {
 
   override def saveAll(usrs: Seq[User]): Seq[Long] = DB localTx { implicit session =>
     val keys = sql"INSERT INTO users (male, nm_title, nm_first, nm_last, email, phone) VALUES (?, ?, ?, ?, ?, ?)"
-      .batchAndReturnGeneratedKey("id", userInsertData(usrs): _*).apply().asInstanceOf[Seq[Long]]
+      .batchAndReturnGeneratedKey(userInsertData(usrs): _*).apply().asInstanceOf[Seq[Long]]
 
 
     sql"INSERT INTO locations (user_id, street, city, state, postcode) VALUES (?, ?, ?, ?, ?)"
@@ -23,14 +34,25 @@ class ScalikeJdbcUserDao extends UserDao {
   }
 
   override def save(user: User): Long = DB localTx { implicit session =>
-    sql"""INSERT INTO users (male, nm_title, nm_first, nm_last, email, phone) VALUES (
-          |${user.male},
-          |${user.nmTitle},
-          |${user.nmFirst},
-          |${user.nmLast},
-          |${user.email},
-          |${user.phone})""".stripMargin
-      .updateAndReturnGeneratedKey("id").apply()
+    val id =
+      sql"""INSERT INTO users (male, nm_title, nm_first, nm_last, email, phone) VALUES (
+            |${user.male},
+            |${user.nmTitle},
+            |${user.nmFirst},
+            |${user.nmLast},
+            |${user.email},
+            |${user.phone})""".stripMargin
+        .updateAndReturnGeneratedKey.apply()
+
+    val loc = user.location
+    sql"""INSERT INTO locations (user_id, street, city, state, postcode) VALUES (
+          |${id},
+          |${loc.street},
+          |${loc.city},
+          |${loc.state},
+          |${loc.postcode})""".stripMargin
+      .update().apply()
+    id
   }
 
   override def getById(id: Long): Option[User] = DB readOnly { implicit session =>
@@ -38,9 +60,10 @@ class ScalikeJdbcUserDao extends UserDao {
       .map(userMapping).single.apply()
   }
 
-  override def getByName(firstNm: String, lastNm: String): Option[User] = DB readOnly { implicit session =>
-    sql"${UserSql} where u.nm_first = ${firstNm} and u.nm_last = ${lastNm}"
-      .map(userMapping).single.apply()
+  override def getByName(nm: String): Seq[User] = DB readOnly { implicit session =>
+    val name = s"%$nm%"
+    sql"${UserSql} where u.nm_first like ${name} or u.nm_last like ${name}"
+      .map(userMapping).list.apply()
   }
 
 
@@ -52,6 +75,7 @@ class ScalikeJdbcUserDao extends UserDao {
 
   private val UserSql =
     sqls"""SELECT
+           |    u.id,
            |    u.male,
            |    u.nm_title,
            |    u.nm_first,
@@ -71,7 +95,7 @@ class ScalikeJdbcUserDao extends UserDao {
 
   private def userMapping(rs: WrappedResultSet): User = {
     val location = Location(rs.string("street"), rs.string("city"), rs.string("state"), rs.string("postcode"))
-    User(rs.boolean("male"), rs.string("nm_title"), rs.string("nm_first"), rs.string("nm_last"), location, rs.string("email"), rs.string("phone"))
+    User(rs.longOpt("id"), rs.boolean("male"), rs.string("nm_title"), rs.string("nm_first"), rs.string("nm_last"), location, rs.string("email"), rs.string("phone"))
   }
 
   private def userInsertData(users: Seq[User]) = users.map(u => Seq(
@@ -91,3 +115,5 @@ class ScalikeJdbcUserDao extends UserDao {
       l.postcode)
   }
 }
+
+

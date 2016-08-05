@@ -11,7 +11,11 @@ trait UserDao {
 
   def getById(id: Long): Option[User]
 
-  def getByName(firstNm: String, lastNm: String): Option[User]
+  def getByName(name: String): Seq[User]
+
+  def count(): Int
 
   def clean(): Int
+
+  def initDb(): Boolean
 }

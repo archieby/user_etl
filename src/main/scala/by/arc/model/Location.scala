@@ -1,8 +1,8 @@
 package by.arc.model
 
 import play.api.data.validation.ValidationError
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 case class Location(
                      street: String,
@@ -20,10 +20,10 @@ object Location {
     }
   }
 
-  implicit val locationReads: Reads[Location] = (
-    (JsPath \ "street").read[String] and
-      (JsPath \ "city").read[String] and
-      (JsPath \ "state").read[String] and
-      (JsPath \ "postcode").read(pcReads)
-    ) (Location.apply _)
+  implicit val locationFormat: Format[Location] = (
+    (JsPath \ "street").format[String] and
+      (JsPath \ "city").format[String] and
+      (JsPath \ "state").format[String] and
+      (JsPath \ "postcode").format(pcReads)
+    ) (Location.apply _ , unlift(Location.unapply))
 }

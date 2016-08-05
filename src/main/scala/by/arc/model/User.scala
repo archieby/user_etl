@@ -1,11 +1,11 @@
 package by.arc.model
 
 import play.api.data.validation.ValidationError
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 case class User(
-                 //                 id: Long = -1,
+                 id: Option[Long] = None,
                  male: Boolean,
                  nmTitle: String,
                  nmFirst: String,
@@ -13,23 +13,29 @@ case class User(
                  location: Location,
                  email: String,
                  phone: String
-               )
+               ) {
+
+  override def toString: String = Json.stringify(Json.toJson(this))
+}
 
 object User {
-  private val genderReads = new Reads[Boolean] {
+  private val genderFormat = new Format[Boolean] {
     def reads(json: JsValue) = json match {
       case JsString(s) => JsSuccess(s.equalsIgnoreCase("male"))
       case _ => JsError(Seq(JsPath() -> Seq(ValidationError("male/female string expected"))))
     }
+
+    override def writes(male: Boolean): JsValue = if (male) JsString("male") else JsString("female")
   }
 
-  implicit val locationReads: Reads[User] = (
-    (JsPath \ "gender").read(genderReads) and
-      (JsPath \ "name" \ "title").read[String] and
-      (JsPath \ "name" \ "first").read[String] and
-      (JsPath \ "name" \ "last").read[String] and
-      (JsPath \ "location").read[Location] and
-      (JsPath \ "email").read[String] and
-      (JsPath \ "phone").read[String]
-    ) (User.apply _)
+  implicit val userFormat: Format[User] = (
+    (JsPath \ "uid").formatNullable[Long] and
+      (JsPath \ "gender").format(genderFormat) and
+      (JsPath \ "name" \ "title").format[String] and
+      (JsPath \ "name" \ "first").format[String] and
+      (JsPath \ "name" \ "last").format[String] and
+      (JsPath \ "location").format[Location] and
+      (JsPath \ "email").format[String] and
+      (JsPath \ "phone").format[String]
+    ) (User.apply _, unlift(User.unapply))
 }

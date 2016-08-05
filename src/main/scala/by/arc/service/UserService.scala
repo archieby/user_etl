@@ -1,31 +1,48 @@
 package by.arc.service
 
-import java.util.ResourceBundle
-
 import by.arc._
 import by.arc.dao.UserDao
-import by.arc.http.WsClient._
-import by.arc.model.User
-import play.api.libs.json.{JsPath, Json}
+import by.arc.service.UserService._
 
-import scala.concurrent.Future
+class UserService(val userDao: UserDao, val userProducer: UserProducer) {
 
-class UserService(val userDao: UserDao) {
-
-  def populateUsers(num: Int = conf.getInt("http.default.results")): Future[String] = {
-    withClient(conf.getString("http.users.url")) { resp =>
-      val usrs = Json.parse(resp).as((JsPath \ "results").read[Seq[User]])
-      userDao.saveAll(usrs)
-      s"$num successfully added to DB."
-    }
+  def initDb(): String = handle(userDao.initDb())("Unable to initialize DB") { b =>
+    s"Database Initialized."
   }
 
-  def cleanUsers() = userDao.clean()
+  def populateUsers(num: Int = 0): String = handle {
+    val users = userProducer.createUsers(num)
+    userDao.saveAll(users).size
+  }("Unable to populate Users")(i => s"$i Users successfully added to the DB.")
 
-  //  def cleanUsers() = userDao.clean()
+  def count: String = handle(userDao.count())("Unable to count Users")(i => s"There are $i Users in the DB.")
 
+  def addUser(firstName: String, lastName: String) = handle {
+    val users = userProducer.createUsers(1)
+    val newLocation = users.head.location.copy()
+    val newUser = users.head.copy(nmFirst = firstName, nmLast = lastName, location = newLocation)
+    (userDao.save(newUser), firstName, lastName)
+  }(s"Unable to add User['$firstName'/'$lastName']")(d => s"New User was added to DB [${d._1}/'${d._2}'/'${d._3}']")
+
+  def cleanUsers() = handle(userDao.clean())("DB cleanup Failed")(i => s"Data for $i Users successfully removed from the DB.")
+
+  def getAllUsers() = handle(userDao.getAll())("Unable to retrieve all Users")(usrs => s"All Users:$LS${stringifyUsers(usrs)}")
+
+  def getByName(name: String) = handle(userDao.getByName(name))("Unable to retrieve the User by Name") { usrs =>
+    s"Found by Name:$LS${stringifyUsers(usrs)}"
+  }
+
+  def getById(id: Long) = handle(userDao.getById(id))("Unable to retrieve the User by Id") { usr =>
+    usr.fold(s"No User exists for id:$id.")(u => s"User Found by Id: $u.")
+  }
 }
 
 object UserService {
-  private val myBundle: ResourceBundle = ResourceBundle.getBundle("com.intellij.fontChooser.FontChooser")
+  def handle[T](task: => T)(fail: String)(succ: T => String): String = {
+    try {
+      succ(task)
+    } catch {
+      case e: Throwable => fail + ": " + (if (e.getMessage == null) e.getClass.getSimpleName else e.getMessage)
+    }
+  }
 }
