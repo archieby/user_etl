@@ -19,7 +19,6 @@ trait WsClient {
     val client = AhcWSClient(AhcWSClientConfig(maxRequestRetry = conf.getInt("http.retry")))(materializer)
 
     val request = client.url(url).withHeaders("Accept" -> "application/json").get()
-    //    request.
 
     val rv = request.map(resp => block(resp.body))
 
@@ -35,7 +34,5 @@ object WsClient extends WsClient {
 
   import java.util.concurrent.atomic.AtomicInteger
 
-  // This is used to create fresh names when creating `ActorMaterializer` instances in `WsClient.withClient`.
-  // The motivation is that it can be useful for debugging.
   private val instanceNumber = new AtomicInteger(1)
 }

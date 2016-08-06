@@ -18,7 +18,7 @@ object Main extends App with UserModule {
   val ExitRgxp = """^exit$""".r
 
   lazy val usage =
-    s"""\tinitdbhelp - Initializes DB ([re]creates required tables).
+    s"""\tinitdb - Initializes DB ([re]creates required tables).
         |\tpopulate [num] - populates DB with num Users. If num not provided default value ${conf.getInt("http.default.results")} is used.
         |\tadd <first-name> <last-name> - adds User with the provided name to the DB.
         |\tclean - cleans DB.

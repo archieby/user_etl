@@ -4,6 +4,8 @@ version := "1.0"
 
 scalaVersion := "2.11.7"
 
+mainClass in Compile := Some("by.arc.main.Main")
+
 val playVersion = "2.5.+"
 val scalikeVersion = "2.4.+"
 
