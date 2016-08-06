@@ -9,9 +9,10 @@ mainClass in Compile := Some("by.arc.main.Main")
 val playVersion = "2.5.+"
 val scalikeVersion = "2.4.+"
 
-libraryDependencies += "com.typesafe.play" % "play-ws_2.11" % playVersion
-libraryDependencies += "com.typesafe.play" % "play-json_2.11" % playVersion
+libraryDependencies += "com.typesafe.play" %% "play-ws" % playVersion
+libraryDependencies += "com.typesafe.play" %% "play-json" % playVersion
 libraryDependencies += "com.typesafe" % "config" % "1.3.+"
+libraryDependencies += "com.softwaremill.macwire" %% "macros" % "2.2.+" % "provided"
 
 libraryDependencies ++= Seq(
   "org.scalikejdbc" %% "scalikejdbc" % scalikeVersion,
@@ -21,10 +22,6 @@ libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-dbcp2" % "2.1.+"
 )
 
-
-libraryDependencies += "com.softwaremill.macwire" %% "macros" % "2.2.+" % "provided"
-
-
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
-libraryDependencies += "org.scalikejdbc" %% "scalikejdbc-test" % scalikeVersion % "test"
+// test dependencies
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.+" % "test"
 libraryDependencies += "com.h2database" % "h2" % "1.4.+" % "test"
