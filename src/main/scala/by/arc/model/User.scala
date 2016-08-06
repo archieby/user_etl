@@ -37,5 +37,5 @@ object User {
       (JsPath \ "location").format[Location] and
       (JsPath \ "email").format[String] and
       (JsPath \ "phone").format[String]
-    ) (User.apply _, unlift(User.unapply))
+    ) (User.apply, unlift(User.unapply))
 }

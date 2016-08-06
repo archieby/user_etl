@@ -25,5 +25,5 @@ object Location {
       (JsPath \ "city").format[String] and
       (JsPath \ "state").format[String] and
       (JsPath \ "postcode").format(pcReads)
-    ) (Location.apply _ , unlift(Location.unapply))
+    ) (Location.apply , unlift(Location.unapply))
 }

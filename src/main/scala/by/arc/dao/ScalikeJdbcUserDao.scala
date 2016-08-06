@@ -61,8 +61,8 @@ class ScalikeJdbcUserDao extends UserDao {
   }
 
   override def getByName(nm: String): Seq[User] = DB readOnly { implicit session =>
-    val name = s"%$nm%"
-    sql"${UserSql} where u.nm_first like ${name} or u.nm_last like ${name}"
+    val name = s"%${nm.toUpperCase()}%"
+    sql"${UserSql} where upper(u.nm_first) like ${name} or upper(u.nm_last) like ${name}"
       .map(userMapping).list.apply()
   }
 

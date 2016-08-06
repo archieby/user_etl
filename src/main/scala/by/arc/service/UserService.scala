@@ -42,7 +42,7 @@ object UserService {
     try {
       succ(task)
     } catch {
-      case e: Throwable => fail + ": " + (if (e.getMessage == null) e.getClass.getSimpleName else e.getMessage)
+      case e: Throwable => fail + s":$LS" + (if (e.getMessage == null) e.getClass.getSimpleName else e.getMessage)
     }
   }
 }

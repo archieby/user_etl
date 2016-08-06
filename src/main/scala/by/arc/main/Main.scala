@@ -24,7 +24,7 @@ object Main extends App with UserModule {
         |\tclean - cleans DB.
         |\tall - retrieves all User data from DB.
         |\tget <id-numeric> - gets the User from DB by id if one exists.
-        |\tget <name-string> - gets all Users from DB whoes first or last name matches this wildcard - *<name-string>*.
+        |\tget <name-string> - gets all Users from DB whoes first or last name matches ignore case this wildcard - *<name-string>*.
         |\tcount - returns number of Users in DB.
         |\thelp - shows this help.
         |\texit - exits from the Application.""".stripMargin
