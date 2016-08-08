@@ -8,8 +8,8 @@ Available commands:
 * add <first-name> <last-name> - adds User with the provided name to the DB.
 * clean - cleans DB.
 * all - retrieves all User data from DB.
-* get <id-numeric> - gets the User from DB by id if one exists.
-* get <name-string> - gets all Users from DB whoes first or last name matches ignore case this wildcard - *<name-string>*.
+* get [id-numeric] - gets the User from DB by id if one exists.
+* get [name-string] - gets all Users from DB whoes first or last name matches ignore case this wildcard - *<name-string>*.
 * count - returns number of Users in DB.
 * help - shows this help.
 * exit - exits from the Application.
