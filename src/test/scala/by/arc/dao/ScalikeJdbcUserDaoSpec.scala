@@ -1,20 +1,21 @@
 package by.arc.dao
 
-import by.arc._
 import by.arc.UnitSpec
 import by.arc.model.{Location, User}
 import by.arc.service.UserProducer
 import org.scalatest.BeforeAndAfter
 import scalikejdbc.config.DBs
-import scalikejdbc.{DB, SQL}
 
 class ScalikeJdbcUserDaoSpec extends UnitSpec with BeforeAndAfter {
 
-  DBs.setupAll()
-  userDao.initDb()
+  before {
+    DBs.setupAll()
+    userDao.initDb()
+  }
 
   after {
     userDao.clean()
+    DBs.closeAll()
   }
 
   val usrs5 = userProducer.createUsers(5)
