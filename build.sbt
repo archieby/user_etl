@@ -34,4 +34,4 @@ libraryDependencies ++= Seq(
   // test dependencies
   "org.scalatest" %% "scalatest" % "3.0.+" % "test",
   "com.h2database" % "h2" % "1.4.+" % "test"
-).map(_.exclude("commons-logging", "commons-logging").excludeAll(ExclusionRule(organization = "commons-logging")))
+).map(_.exclude("commons-logging", "commons-logging"))
