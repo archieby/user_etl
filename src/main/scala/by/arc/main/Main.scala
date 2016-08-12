@@ -29,6 +29,7 @@ object Main extends App with UserModule {
         |\thelp - shows this help.
         |\texit - exits from the Application.""".stripMargin
 
+  println(s"Application usage:$LS$usage")
   while (true) {
     val tokens = readLine().trim
     println(tokens match {
