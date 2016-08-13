@@ -14,11 +14,11 @@ Available commands:
 * help - shows this help.
 * exit - exits from the Application.
 
-PostgreSQL schema is stored under the **../main/sct/resources/** folder:
+PostgreSQL schema is stored under the **../main/src/resources/** folder:
 * users.sql
 * locations.sql
 
-Application configuration: **../main/sct/resources/application.conf**
+Application configuration: **../main/src/resources/application.conf**
 
 Feel free to modify the provided settings as required.
 
